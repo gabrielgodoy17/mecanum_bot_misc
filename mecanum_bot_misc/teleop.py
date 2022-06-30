@@ -10,12 +10,10 @@ class KeyboardRead(Node):
         super().__init__('keyboard_read')
         self.publisher_ = self.create_publisher(String, 'directions', 10)
 
-
-def on_press(key, node):    
+def on_press(key, node):
     msg = String()
     msg.data = dict.get(key, 'STOP')
     node.publisher_.publish(msg)
-    
 
 dict = {
     keyboard.KeyCode(char = '8') : 'FWD',
@@ -34,7 +32,7 @@ dict = {
 
 
 def main(args=None):
-
+    
     rclpy.init(args=args)
     keyboard_read = KeyboardRead()
 
