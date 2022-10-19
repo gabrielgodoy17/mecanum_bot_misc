@@ -21,26 +21,21 @@ from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from nav2_common.launch import RewrittenYaml
-from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
     # Get the launch directory
-    pkg_share = FindPackageShare(package='mecanum_bot_misc').find('mecanum_bot_misc')
-
-    custom_nav2_params_file = os.path.join(pkg_share, 'config/custom_nav2_params.yaml')
+    bringup_dir = get_package_share_directory('nav2_bringup')
 
     namespace = LaunchConfiguration('namespace')
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
-    default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
+    params_file = LaunchConfiguration('params_file')
 
     lifecycle_nodes = ['controller_server',
                        'planner_server',
-                       'recoveries_server',
                        'bt_navigator',
-                       'waypoint_follower'
-                       ]
+                       'waypoint_follower']
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -54,11 +49,10 @@ def generate_launch_description():
     # Create our own temporary YAML files that include substitutions
     param_substitutions = {
         'use_sim_time': use_sim_time,
-        'default_bt_xml_filename': default_bt_xml_filename,
         'autostart': autostart}
 
     configured_params = RewrittenYaml(
-            source_file=custom_nav2_params_file,
+            source_file=params_file,
             root_key=namespace,
             param_rewrites=param_substitutions,
             convert_types=True)
@@ -80,11 +74,9 @@ def generate_launch_description():
             description='Automatically startup the nav2 stack'),
 
         DeclareLaunchArgument(
-            'default_bt_xml_filename',
-            default_value=os.path.join(
-                get_package_share_directory('nav2_bt_navigator'),
-                'behavior_trees', 'navigate_w_replanning_and_recovery.xml'),
-            description='Full path to the behavior tree xml file to use'),
+            'params_file',
+            default_value=os.path.join(bringup_dir, 'params', 'nav2_params.yaml'),
+            description='Full path to the ROS2 parameters file to use'),
 
         Node(
             package='nav2_controller',
@@ -101,13 +93,6 @@ def generate_launch_description():
             parameters=[configured_params],
             remappings=remappings),
 
-        Node(
-            package='nav2_recoveries',
-            executable='recoveries_server',
-            name='recoveries_server',
-            output='screen',
-            parameters=[configured_params],
-            remappings=remappings),
 
         Node(
             package='nav2_bt_navigator',
@@ -124,7 +109,6 @@ def generate_launch_description():
             output='screen',
             parameters=[configured_params],
             remappings=remappings),
-         
 
         Node(
             package='nav2_lifecycle_manager',

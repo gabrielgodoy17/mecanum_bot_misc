@@ -14,7 +14,7 @@ def generate_launch_description():
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/config.rviz')
     default_model_path = os.path.join(bot_pkg_share, 'description/mecanum_bot_description.urdf')
     ekf_params_file = os.path.join(bot_pkg_share, 'config/ekf.yaml')
-    offline_params_file = os.path.join(slam_pkg_share, 'config/mapper_params_offline.yaml')
+    custom_online_params_file = os.path.join(pkg_share, 'config/custom_online_slam_params.yaml')
     online_async_params_file = os.path.join(slam_pkg_share, 'config/mapper_params_online_async.yaml')
     online_sync_params_file = os.path.join(slam_pkg_share, 'config/mapper_params_online_sync.yaml')
     custom_slam_params_file = os.path.join(pkg_share, 'config/custom_slam_params.yaml')
@@ -88,13 +88,6 @@ def generate_launch_description():
         name='wheels_speed_broadcaster'
     )
 
-    tf2_node = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_tf_pub_laser',
-        arguments=['0', '0', '0.02','0', '0', '0', '1','base_link','laser_frame'],
-    )
-   
     return launch.LaunchDescription([
         DeclareLaunchArgument(
             name='rvizconfig', 
@@ -113,6 +106,6 @@ def generate_launch_description():
         fwd_kinematics_node,
         inv_kinematics_node,
         # wheels_joint_update_node,
-        wheels_speed_broadcaster,
-        tf2_node
+        wheels_speed_broadcaster
+        # tf2_node
     ])

@@ -12,6 +12,8 @@ def generate_launch_description():
     
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/config.rviz')
     default_model_path = os.path.join(bot_pkg_share, 'description/mecanum_bot_description.urdf')
+    # ekf_params_file = os.path.join(bot_pkg_share, 'config/ekf.yaml')
+    # custom_slam_params_file = os.path.join(pkg_share, 'config/custom_slam_params.yaml')
 
     rviz_node = Node(
         package='rviz2',
@@ -20,6 +22,23 @@ def generate_launch_description():
         output='screen',
         arguments=['-d', LaunchConfiguration('rvizconfig')],
     )
+
+    # robot_localization_node = Node(
+    #     package='robot_localization',
+    #     executable='ekf_node',
+    #     name='ekf_filter_node',
+    #     parameters=[ekf_params_file]
+    # )
+
+    # slam_node = Node(
+    #     parameters=[
+    #         custom_slam_params_file
+    #     ],
+    #     package='slam_toolbox',
+    #     executable='async_slam_toolbox_node',
+    #     name='slam_toolbox',
+    #     output='screen'
+    # )
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
@@ -65,13 +84,13 @@ def generate_launch_description():
         name='wheels_speed_broadcaster'
     )
 
-    tf2_node = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_tf_pub_laser',
-        arguments=['0', '0', '0.02','0', '0', '0', '1','base_link','laser_frame'],
-    )
-   
+    # tf2_node = Node(
+    #     package='tf2_ros',
+    #     executable='static_transform_publisher',
+    #     name='static_tf_pub_laser',
+    #     arguments=['0', '0', '0.02','0', '0', '0', '1','base_link','laser_frame'],
+    # )
+
     return launch.LaunchDescription([
         DeclareLaunchArgument(
             name='rvizconfig', 
@@ -88,6 +107,8 @@ def generate_launch_description():
         fwd_kinematics_node,
         inv_kinematics_node,
         # wheels_joint_update_node,
-        wheels_speed_broadcaster,
-        tf2_node
+        wheels_speed_broadcaster
+        # tf2_node
+        # robot_localization_node,
+        # slam_node
     ])

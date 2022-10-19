@@ -20,15 +20,25 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+from nav2_common.launch import RewrittenYaml
 
 
 def generate_launch_description():
+
+    pkg_share = FindPackageShare(package='mecanum_bot_misc').find('mecanum_bot_misc')
+    custom_nav2_params_file = os.path.join(pkg_share, 'config/custom_nav2_params.yaml')
+
     # Get the launch directory
     map_file = LaunchConfiguration('map_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
 
-    lifecycle_nodes = ['map_server']
+
+    lifecycle_nodes = ['map_server',
+                        'amcl'
+                        ]
+
 
     return LaunchDescription([
 
@@ -47,6 +57,14 @@ def generate_launch_description():
             output='screen',
             parameters=[{'use_sim_time': False},
             {'yaml_filename': map_file}]),
+
+        Node(
+            package='nav2_amcl',
+            executable='amcl',
+            name='amcl',
+            output='screen',
+            respawn=False,
+            respawn_delay=2.0),
          
 
         Node(
